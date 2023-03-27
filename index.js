@@ -14,7 +14,7 @@ app.get('/', homePageHandler);
 app.get('/favorite',favHandler);//lab11
 app.get('/trending', trendingHandler);//lab12
 app.get('/search', movieNameSearch);
-app.get('/TVEpisodes', EpisodesTvHandler);
+app.get('/populer', popularMovieHandler);
 app.get('/companies',companiesHandler)
 
 app.get('/',homePageHandler);
@@ -92,17 +92,17 @@ function MovieFilterCon(id,title,date,path,overview){
   }
 
 //functions of new routes
-function EpisodesTvHandler(req, res)
+function popularMovieHandler(req, res)
 {
-    let name=req.query.name;
-    let URL=`https://api.themoviedb.org/3/movie/157336?api_key=${apikey}&query=${name}`
+    let URL=`https://api.themoviedb.org/3/movie/popular?api_key=${apikey}&language=en-US&page=1`
     axios.get(URL).then((result) => {
-        let TVInfo = result.data.genres.map((element) => {
-            return new TvInfoOb(element.name, element.id, element.department)
+        let Info = result.data.results.map((element) => {
+            return new seInfoOb(element.poster_path, element.overview, element.release_date)
         });
-        res.json(TVInfo);
+        res.json(Info);
         // res.send("hi");
         // console.log(result);
+
     })
     .catch((err) => {
         console.log(err.message);
@@ -110,11 +110,11 @@ function EpisodesTvHandler(req, res)
     })
 }
 //constructor
-function TvInfoOb(name,id,department)
+function seInfoOb(poster_path,overview,release_date)
 {
-    this.name=name;
-    this.id=id;
-    this.department=department;
+    this.poster_path=poster_path;
+    this.overview=overview;
+    this.release_date=release_date;
 }
 function companiesHandler(req,res)
 {
