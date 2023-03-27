@@ -37,3 +37,49 @@ b)create .env file in VS
 
 c)write inside it what you wil not push to github
 ```
+
+**lab13**
+![wrrc](./Untitled%20(5).jpg)
+```
+1.\l list all databases
+2.\q quit from database shell
+3.\d list all tables I have inside the database
+```
+```
+go inside your database shell : - server is running sqlstart - psql
+```
+
+**create a new database**
+```
+CREATE DATABASE databasename;
+create a new table :
+inside schema.sql file :
+    CREATE TABLE table_name (
+    column1 datatype,
+    column2 datatype,
+    column3 datatype,);
+```
+3. connect my table to my database
+```
+ psql  -d databasename -f schema.sql
+Write qureis in my server:
+```
+```
+npm install pg
+
+In index.js:
+
+const url="postgres://username:password@localhost:5432/databaseName" // store it in the .env file
+create a new client instance
+
+const { Client } = require('pg')
+const client = new Client(url)
+// connect to db
+client.connect().then(() => {
+
+    app.listen(PORT, () => {
+        console.log(`Server is listening ${PORT}`);
+    });
+})
+use client.query() to do CRUD
+```
