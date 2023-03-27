@@ -5,19 +5,28 @@ const cors = require('cors');
 const axios = require('axios');
 const Mdata=require("./data.json")
 require('dotenv').config();
+const bodyParser = require('body-parser');
+const { Client } = require('pg');
 
 const PORT = process.env.PORT;
 const apikey = process.env.API_KEY;
+let URL=process.env.URL;
+const client = new Client(URL);
 
 app.use(cors());
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.json());
+
 app.get('/', homePageHandler);
 app.get('/favorite',favHandler);//lab11
 app.get('/trending', trendingHandler);//lab12
 app.get('/search', movieNameSearch);
 app.get('/TVEpisodes', EpisodesTvHandler);
 app.get('/companies',companiesHandler)
-
 app.get('/',homePageHandler);
+app.post('/addMovie', addMovieHandler)//lab13
+app.get('/getData', getDataHandler)
+app.use(errorHandler);
 function homePageHandler(req, res)
 {
     let result=[];
@@ -138,9 +147,41 @@ function CompanyInfo(id,name,homepage)
     this.name=name;
     this.homepage=homepage;
 }
+//lab13
+function addMovieHandler(req, res) {
+    console.log(req.body);
+    let {id,original_title,release_date,poster_path,overview} = req.body;
+    let sql = `INSERT INTO MovieTable (id,original_title,release_date,poster_path,overview) VALUES ($1,$2,$3,$4,$5) RETURNING * ;`;
+    let values = [id, original_title,release_date,poster_path,overview]
+    client.query(sql, values).then((result) => {
+        console.log(result.rows)
+        res.json(result.rows);
 
-app.listen(PORT, () => {
-    console.log(`hello from port ${PORT}`);
-})
+    }).catch((err) => {
+        errorHandler(err, req, res);
+    })
+}
+//read all data from database table
+function getDataHandler(req, res) {
+    let sql = `SELECT * FROM MovieTable;`;
+    client.query(sql).then((result) => {
+        console.log(result);
+        res.json(result.rows)
+    }).catch((err) => {
+        errorHandler(err, req, res)
+    })
+}
+//handel error 500
+function errorHandler(err, req, res, next) {
+    return res.status(500).json({ status: 500, responseText: "ERROR 500" });
+}
 
+
+
+client.connect().then(()=>{
+    app.listen(PORT,()=>{
+        console.log(`hello from  port ${PORT}`);
+    })
+
+}).catch()
  
