@@ -26,6 +26,9 @@ app.get('/companies',companiesHandler)
 app.get('/',homePageHandler);
 app.post('/addMovie', addMovieHandler)//lab13
 app.get('/getData', getDataHandler)
+app.put('/UPDATE/:id',updateTable);//lab14
+app.delete('/DELETE/:id',deleteTable);
+app.get('/getMovie/:id',getMovieHandler);
 app.use(errorHandler);
 function homePageHandler(req, res)
 {
@@ -150,9 +153,10 @@ function CompanyInfo(id,name,homepage)
 //lab13
 function addMovieHandler(req, res) {
     console.log(req.body);
-    let {id,original_title,release_date,poster_path,overview} = req.body;
-    let sql = `INSERT INTO MovieTable (id,original_title,release_date,poster_path,overview) VALUES ($1,$2,$3,$4,$5) RETURNING * ;`;
-    let values = [id, original_title,release_date,poster_path,overview]
+    let id=req.params.id;
+    let {original_title,release_date,poster_path,overview} = req.body;
+    let sql = `INSERT INTO MovieTable (original_title,release_date,poster_path,overview) VALUES ($1,$2,$3,$4) RETURNING * ;`;
+    let values = [ original_title,release_date,poster_path,overview]
     client.query(sql, values).then((result) => {
         console.log(result.rows)
         res.json(result.rows);
@@ -176,8 +180,38 @@ function errorHandler(err, req, res, next) {
     return res.status(500).json({ status: 500, responseText: "ERROR 500" });
 }
 
+//lab14
+function updateTable(req,res){
+  // console.log(111,req.params)
+    let idParams= req.params.id;
+    let {original_title,release_date,poster_path,overview} = req.body;
+    let sql= `UPDATE MovieTable SET original_title=$1, release_date=$2,poster_path=$3,overview=$4 WHERE original_title=$5 RETURNING *;`;
+    let values = [original_title,release_date,poster_path,overview,idParams]
 
+    client.query(sql,values).then((result)=>{
+      console.log(result.rows);
+      res.send("updated");
+    }).catch((err)=>{
+      errorHandler(err,req,res);
+    })
+  }
+  function deleteTable(req,res){
+    let {idParams} = req.params; //destructuring
+    let sql=`DELETE FROM Movietable WHERE original_title = $1;` ;
+    let value = [idParams];
+    client.query(sql,value).then(result=>{
+        res.status(204).send("deleted");
+    }).catch()
+  }
 
+  function getMovieHandler(req,res){
+    let sql=`SELECT * FROM movietable`;
+    client.query(sql).then((result)=>{
+      res.json(result.rows);
+    }).catch((err)=>{
+      errorHandler(err,req,res);
+    })
+  }
 client.connect().then(()=>{
     app.listen(PORT,()=>{
         console.log(`hello from  port ${PORT}`);

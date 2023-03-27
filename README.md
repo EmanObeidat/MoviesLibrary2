@@ -83,3 +83,15 @@ client.connect().then(() => {
 })
 use client.query() to do CRUD
 ```
+
+***lab14***
+![wrrc](./Untitled%20(6).jpg)
+
+```
+UPDATE table_name
+SET column1 = value1, column2 = value2, ...
+WHERE condition;
+```
+```
+DELETE FROM table_name WHERE condition;
+```
