@@ -152,21 +152,25 @@ function CompanyInfo(id,name,homepage)
 }
 //lab13
 function addMovieHandler(req, res) {
+  
     console.log(req.body);
-    let id=req.params.id;
-    let {original_title,release_date,poster_path,overview} = req.body;
-    let sql = `INSERT INTO MovieTable (original_title,release_date,poster_path,overview) VALUES ($1,$2,$3,$4) RETURNING * ;`;
-    let values = [ original_title,release_date,poster_path,overview]
+    let {original_title,release_date,poster_path,overview,myComment} = req.body;
+    let sql = `INSERT INTO MovieTable (original_title, release_date, poster_path,overview,myComment)
+    VALUES ($1,$2,$3,$4,$5) RETURNING *; `
+    let values = [original_title,release_date,poster_path,overview,myComment]
+    
     client.query(sql, values).then((result) => {
         console.log(result.rows)
-        res.json(result.rows);
+        res.status(201).json(result.rows);
 
     }).catch((err) => {
+      console.log("error")
         errorHandler(err, req, res);
     })
 }
 //read all data from database table
 function getDataHandler(req, res) {
+    let id=req.params.id;
     let sql = `SELECT * FROM MovieTable;`;
     client.query(sql).then((result) => {
         console.log(result);
@@ -184,9 +188,9 @@ function errorHandler(err, req, res, next) {
 function updateTable(req,res){
   // console.log(111,req.params)
     let idParams= req.params.id;
-    let {original_title,release_date,poster_path,overview} = req.body;
-    let sql= `UPDATE MovieTable SET original_title=$1, release_date=$2,poster_path=$3,overview=$4 WHERE original_title=$5 RETURNING *;`;
-    let values = [original_title,release_date,poster_path,overview,idParams]
+    let {original_title,release_date,poster_path,overview,myComment} = req.body;
+    let sql= `UPDATE MovieTable SET original_title=$1, release_date=$2,poster_path=$3,overview=$4,myComment=$5 WHERE id=$6 RETURNING *;`;
+    let values = [original_title,release_date,poster_path,overview,myComment,idParams]
 
     client.query(sql,values).then((result)=>{
       console.log(result.rows);
@@ -196,11 +200,11 @@ function updateTable(req,res){
     })
   }
   function deleteTable(req,res){
-    let {idParams} = req.params; //destructuring
-    let sql=`DELETE FROM Movietable WHERE original_title = $1;` ;
+    let idParams = req.params.id; //destructuring
+    let sql=`DELETE FROM MovieTable WHERE id = $1;` ;
     let value = [idParams];
     client.query(sql,value).then(result=>{
-        res.status(204).send("deleted");
+        res.status(201).send("deleted");
     }).catch()
   }
 
