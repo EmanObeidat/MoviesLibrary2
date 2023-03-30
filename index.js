@@ -209,7 +209,9 @@ function updateTable(req,res){
   }
 
   function getMovieHandler(req,res){
-    let sql=`SELECT * FROM movietable`;
+    let id= req.params.id;
+    let values=[id];
+    let sql=`SELECT * FROM MovieTable WHERE id = $1`
     client.query(sql).then((result)=>{
       res.json(result.rows);
     }).catch((err)=>{
